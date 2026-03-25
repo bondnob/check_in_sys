@@ -5,6 +5,7 @@ import com.niuniu.dto.auth.LoginResponse;
 import com.niuniu.dto.auth.WxLoginRequest;
 import com.niuniu.service.AuthService;
 import lombok.extern.slf4j.Slf4j;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -20,6 +21,7 @@ public class AuthController {
     }
 
     @PostMapping("/wx-login")
+    @Operation(summary = "微信登录")
     public ApiResponse<LoginResponse> wxLogin(@RequestBody WxLoginRequest request) {
         log.info("收到登录请求: phone={}", request.getPhone());
         return ApiResponse.success(authService.wxLogin(request));

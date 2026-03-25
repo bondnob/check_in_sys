@@ -21,6 +21,7 @@ import com.niuniu.service.SignRecordService;
 import com.niuniu.service.SignTaskService;
 import com.niuniu.service.StatisticsService;
 import com.niuniu.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,12 +54,14 @@ public class TeacherController {
     }
 
     @GetMapping("/me")
+    @Operation(summary = "查询教师个人信息")
     public ApiResponse<UserProfileResponse> me() {
         log.info("教师查询个人信息");
         return ApiResponse.success(userService.me());
     }
 
     @PutMapping("/me")
+    @Operation(summary = "更新教师个人信息")
     public ApiResponse<Void> updateMe(@RequestBody UpdateProfileRequest request) {
         log.info("教师更新个人信息: name={}, phone={}", request.getName(), request.getPhone());
         userService.updateProfile(request);
@@ -66,12 +69,14 @@ public class TeacherController {
     }
 
     @PostMapping("/courses")
+    @Operation(summary = "创建课程")
     public ApiResponse<CourseResponse> createCourse(@RequestBody CreateCourseRequest request) {
         log.info("教师创建课程: courseName={}, className={}, term={}", request.getCourseName(), request.getClassName(), request.getTerm());
         return ApiResponse.success(courseService.createCourse(request));
     }
 
     @GetMapping("/courses")
+    @Operation(summary = "查询教师课程列表")
     public ApiResponse<PageResponse<CourseResponse>> teachingCourses(@RequestParam(defaultValue = "1") Integer pageNum,
                                                                      @RequestParam(defaultValue = "10") Integer pageSize,
                                                                      @RequestParam(required = false) String keyword) {
@@ -80,12 +85,14 @@ public class TeacherController {
     }
 
     @GetMapping("/courses/{courseId}")
+    @Operation(summary = "查询课程详情")
     public ApiResponse<CourseDetailResponse> courseDetail(@PathVariable Integer courseId) {
         log.info("教师查询课程详情: courseId={}", courseId);
         return ApiResponse.success(courseService.getCourseDetail(courseId));
     }
 
     @PutMapping("/courses/{courseId}")
+    @Operation(summary = "更新课程")
     public ApiResponse<Void> updateCourse(@PathVariable Integer courseId, @RequestBody UpdateCourseRequest request) {
         log.info("教师更新课程: courseId={}, courseName={}", courseId, request.getCourseName());
         courseService.updateCourse(courseId, request);
@@ -93,6 +100,7 @@ public class TeacherController {
     }
 
     @DeleteMapping("/courses/{courseId}")
+    @Operation(summary = "删除课程")
     public ApiResponse<Void> deleteCourse(@PathVariable Integer courseId) {
         log.info("教师删除课程: courseId={}", courseId);
         courseService.deleteCourse(courseId);
@@ -100,6 +108,7 @@ public class TeacherController {
     }
 
     @GetMapping("/courses/{courseId}/members")
+    @Operation(summary = "查询课程成员")
     public ApiResponse<PageResponse<CourseMemberResponse>> courseMembers(@PathVariable Integer courseId,
                                                                          @RequestParam(defaultValue = "1") Integer pageNum,
                                                                          @RequestParam(defaultValue = "10") Integer pageSize) {
@@ -108,6 +117,7 @@ public class TeacherController {
     }
 
     @DeleteMapping("/courses/{courseId}/members/{studentId}")
+    @Operation(summary = "移除课程成员")
     public ApiResponse<Void> removeMember(@PathVariable Integer courseId, @PathVariable Integer studentId) {
         log.info("教师移除课程成员: courseId={}, studentId={}", courseId, studentId);
         courseService.removeMember(courseId, studentId);
@@ -115,12 +125,14 @@ public class TeacherController {
     }
 
     @PostMapping("/sign-tasks")
+    @Operation(summary = "创建签到任务")
     public ApiResponse<SignTaskResponse> createSignTask(@RequestBody CreateSignTaskRequest request) {
         log.info("教师创建签到任务: courseId={}, title={}, signType={}", request.getCourseId(), request.getTitle(), request.getSignType());
         return ApiResponse.success(signTaskService.create(request));
     }
 
     @GetMapping("/courses/{courseId}/sign-tasks")
+    @Operation(summary = "查询签到任务列表")
     public ApiResponse<PageResponse<SignTaskResponse>> signTaskList(@PathVariable Integer courseId,
                                                                     @RequestParam(defaultValue = "1") Integer pageNum,
                                                                     @RequestParam(defaultValue = "10") Integer pageSize) {
@@ -129,12 +141,14 @@ public class TeacherController {
     }
 
     @GetMapping("/sign-tasks/{taskId}")
+    @Operation(summary = "查询签到任务详情")
     public ApiResponse<SignTaskResponse> signTaskDetail(@PathVariable Integer taskId) {
         log.info("教师查询签到任务详情: taskId={}", taskId);
         return ApiResponse.success(signTaskService.detail(taskId));
     }
 
     @PutMapping("/sign-tasks/{taskId}")
+    @Operation(summary = "更新签到任务")
     public ApiResponse<Void> updateSignTask(@PathVariable Integer taskId, @RequestBody UpdateSignTaskRequest request) {
         log.info("教师更新签到任务: taskId={}, title={}", taskId, request.getTitle());
         signTaskService.update(taskId, request);
@@ -142,6 +156,7 @@ public class TeacherController {
     }
 
     @DeleteMapping("/sign-tasks/{taskId}")
+    @Operation(summary = "删除签到任务")
     public ApiResponse<Void> deleteSignTask(@PathVariable Integer taskId) {
         log.info("教师删除签到任务: taskId={}", taskId);
         signTaskService.delete(taskId);
@@ -149,12 +164,14 @@ public class TeacherController {
     }
 
     @GetMapping("/courses/{courseId}/active-sign-task")
+    @Operation(summary = "查询当前有效签到任务")
     public ApiResponse<SignTaskResponse> activeSignTask(@PathVariable Integer courseId) {
         log.info("教师查询当前有效签到任务: courseId={}", courseId);
         return ApiResponse.success(signTaskService.activeTask(courseId));
     }
 
     @GetMapping("/sign-records")
+    @Operation(summary = "查询签到记录")
     public ApiResponse<PageResponse<SignRecordResponse>> signRecords(@RequestParam Integer taskId,
                                                                      @RequestParam(required = false) Integer status,
                                                                      @RequestParam(required = false) String keyword,
@@ -165,6 +182,7 @@ public class TeacherController {
     }
 
     @GetMapping("/sign-records/unsigned")
+    @Operation(summary = "查询未签到名单")
     public ApiResponse<PageResponse<SignRecordResponse>> unsignedRecords(@RequestParam Integer taskId,
                                                                          @RequestParam(defaultValue = "1") Integer pageNum,
                                                                          @RequestParam(defaultValue = "10") Integer pageSize) {
@@ -173,18 +191,21 @@ public class TeacherController {
     }
 
     @GetMapping("/statistics/courses/{courseId}")
+    @Operation(summary = "查询课程统计")
     public ApiResponse<CourseStatisticsResponse> courseStatistics(@PathVariable Integer courseId) {
         log.info("教师查询课程统计: courseId={}", courseId);
         return ApiResponse.success(statisticsService.courseStatistics(courseId));
     }
 
     @GetMapping("/statistics/sign-tasks/{taskId}")
+    @Operation(summary = "查询任务统计")
     public ApiResponse<TaskStatisticsResponse> taskStatistics(@PathVariable Integer taskId) {
         log.info("教师查询任务统计: taskId={}", taskId);
         return ApiResponse.success(statisticsService.taskStatistics(taskId));
     }
 
     @GetMapping("/statistics/courses/{courseId}/students")
+    @Operation(summary = "查询学生出勤统计")
     public ApiResponse<PageResponse<StudentAttendanceResponse>> studentStatistics(@PathVariable Integer courseId,
                                                                                   @RequestParam(defaultValue = "1") Integer pageNum,
                                                                                   @RequestParam(defaultValue = "10") Integer pageSize) {

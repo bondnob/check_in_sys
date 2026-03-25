@@ -15,6 +15,7 @@ import com.niuniu.service.CourseService;
 import com.niuniu.service.SignRecordService;
 import com.niuniu.service.SignTaskService;
 import com.niuniu.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,12 +45,14 @@ public class StudentController {
     }
 
     @GetMapping("/me")
+    @Operation(summary = "查询学生个人信息")
     public ApiResponse<UserProfileResponse> me() {
         log.info("学生查询个人信息");
         return ApiResponse.success(userService.me());
     }
 
     @PutMapping("/me")
+    @Operation(summary = "更新学生个人信息")
     public ApiResponse<Void> updateMe(@RequestBody UpdateProfileRequest request) {
         log.info("学生更新个人信息: name={}, phone={}", request.getName(), request.getPhone());
         userService.updateProfile(request);
@@ -57,6 +60,7 @@ public class StudentController {
     }
 
     @GetMapping("/courses")
+    @Operation(summary = "查询学生已加入课程")
     public ApiResponse<PageResponse<CourseResponse>> joinedCourses(@RequestParam(defaultValue = "1") Integer pageNum,
                                                                    @RequestParam(defaultValue = "10") Integer pageSize) {
         log.info("学生查询已加入课程: pageNum={}, pageSize={}", pageNum, pageSize);
@@ -64,18 +68,21 @@ public class StudentController {
     }
 
     @PostMapping("/courses/join")
+    @Operation(summary = "学生加入课程")
     public ApiResponse<CourseResponse> joinCourse(@RequestBody JoinCourseRequest request) {
         log.info("学生加入课程: inviteCode={}", request.getInviteCode());
         return ApiResponse.success(courseService.joinCourse(request));
     }
 
     @GetMapping("/courses/{courseId}")
+    @Operation(summary = "查询课程详情")
     public ApiResponse<CourseDetailResponse> courseDetail(@PathVariable Integer courseId) {
         log.info("学生查询课程详情: courseId={}", courseId);
         return ApiResponse.success(courseService.getCourseDetail(courseId));
     }
 
     @GetMapping("/courses/{courseId}/sign-tasks")
+    @Operation(summary = "查询签到任务列表")
     public ApiResponse<PageResponse<SignTaskResponse>> signTaskList(@PathVariable Integer courseId,
                                                                     @RequestParam(defaultValue = "1") Integer pageNum,
                                                                     @RequestParam(defaultValue = "10") Integer pageSize) {
@@ -84,30 +91,35 @@ public class StudentController {
     }
 
     @GetMapping("/sign-tasks/{taskId}")
+    @Operation(summary = "查询签到任务详情")
     public ApiResponse<SignTaskResponse> signTaskDetail(@PathVariable Integer taskId) {
         log.info("学生查询签到任务详情: taskId={}", taskId);
         return ApiResponse.success(signTaskService.detail(taskId));
     }
 
     @GetMapping("/courses/{courseId}/active-sign-task")
+    @Operation(summary = "查询当前有效签到任务")
     public ApiResponse<SignTaskResponse> activeSignTask(@PathVariable Integer courseId) {
         log.info("学生查询当前有效签到任务: courseId={}", courseId);
         return ApiResponse.success(signTaskService.activeTask(courseId));
     }
 
     @PostMapping("/sign-records")
+    @Operation(summary = "提交签到")
     public ApiResponse<SignRecordResponse> submitSign(@RequestBody SubmitSignRequest request) {
         log.info("学生提交签到: taskId={}, location={}", request.getTaskId(), request.getLocation());
         return ApiResponse.success(signRecordService.submit(request));
     }
 
     @GetMapping("/sign-records/my-status/{taskId}")
+    @Operation(summary = "查询本人签到状态")
     public ApiResponse<MySignStatusResponse> myStatus(@PathVariable Integer taskId) {
         log.info("学生查询本人签到状态: taskId={}", taskId);
         return ApiResponse.success(signRecordService.myStatus(taskId));
     }
 
     @GetMapping("/sign-records")
+    @Operation(summary = "查询个人签到记录")
     public ApiResponse<PageResponse<SignRecordResponse>> myRecords(@RequestParam(required = false) Integer courseId,
                                                                    @RequestParam(defaultValue = "1") Integer pageNum,
                                                                    @RequestParam(defaultValue = "10") Integer pageSize) {
