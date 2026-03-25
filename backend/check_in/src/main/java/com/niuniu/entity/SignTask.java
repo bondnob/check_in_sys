@@ -10,6 +10,7 @@ public class SignTask {
     private String title;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private Integer status;
     private Integer signType;
     private String qrCode;
     private Double latitude;

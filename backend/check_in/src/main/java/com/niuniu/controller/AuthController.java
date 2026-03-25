@@ -22,6 +22,7 @@ public class AuthController {
 
     @PostMapping("/wx-login")
     @Operation(summary = "微信登录")
+
     public ApiResponse<LoginResponse> wxLogin(@RequestBody WxLoginRequest request) {
         log.info("收到登录请求: phone={}", request.getPhone());
         return ApiResponse.success(authService.wxLogin(request));

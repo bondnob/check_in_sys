@@ -45,6 +45,9 @@ public class SignRecordService {
         }
         log.info("开始处理签到: studentId={}, taskId={}", session.getUserId(), request.getTaskId());
         SignTask task = requireTask(request.getTaskId());
+        if (task.getStatus() != null && task.getStatus() == 1) {
+            throw new BusinessException(409, "签到任务已结束");
+        }
         CourseMember member = courseMemberMapper.findByCourseAndStudent(task.getCourseId(), session.getUserId());
         if (member == null) {
             throw new BusinessException(403, "你不在该课程中");

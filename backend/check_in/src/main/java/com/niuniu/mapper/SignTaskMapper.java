@@ -14,8 +14,8 @@ import org.apache.ibatis.annotations.Update;
 public interface SignTaskMapper {
 
     @Insert("""
-            insert into sign_tasks(course_id, title, start_time, end_time, sign_type, qr_code, latitude, longitude, radius, late_time)
-            values(#{courseId}, #{title}, #{startTime}, #{endTime}, #{signType}, #{qrCode}, #{latitude}, #{longitude}, #{radius}, #{lateTime})
+            insert into sign_tasks(course_id, title, start_time, end_time, status, sign_type, qr_code, latitude, longitude, radius, late_time)
+            values(#{courseId}, #{title}, #{startTime}, #{endTime}, #{status}, #{signType}, #{qrCode}, #{latitude}, #{longitude}, #{radius}, #{lateTime})
             """)
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(SignTask task);
@@ -33,6 +33,26 @@ public interface SignTaskMapper {
                                 @Param("offset") Integer offset,
                                 @Param("pageSize") Integer pageSize);
 
+    @Select("""
+            select st.*
+            from sign_tasks st
+            join courses c on st.course_id = c.id
+            where c.teacher_id = #{teacherId}
+            order by st.id desc
+            limit #{offset}, #{pageSize}
+            """)
+    List<SignTask> listByTeacher(@Param("teacherId") String teacherId,
+                                 @Param("offset") Integer offset,
+                                 @Param("pageSize") Integer pageSize);
+
+    @Select("""
+            select count(1)
+            from sign_tasks st
+            join courses c on st.course_id = c.id
+            where c.teacher_id = #{teacherId}
+            """)
+    long countByTeacher(@Param("teacherId") String teacherId);
+
     @Select("select count(1) from sign_tasks where course_id = #{courseId}")
     long countByCourse(@Param("courseId") Integer courseId);
 
@@ -41,6 +61,7 @@ public interface SignTaskMapper {
             set title = #{title},
                 start_time = #{startTime},
                 end_time = #{endTime},
+                status = #{status},
                 sign_type = #{signType},
                 qr_code = #{qrCode},
                 latitude = #{latitude},
@@ -57,12 +78,21 @@ public interface SignTaskMapper {
     @Select("""
             select * from sign_tasks
             where course_id = #{courseId}
+              and status = 0
               and start_time <= now()
               and end_time >= now()
             order by id desc
             limit 1
             """)
     SignTask activeByCourse(@Param("courseId") Integer courseId);
+
+    @Update("""
+            update sign_tasks
+            set status = 1
+            where status = 0
+              and end_time < now()
+            """)
+    int markExpiredTasksFinished();
 
     @Select("select count(1) from sign_tasks where course_id = #{courseId}")
     int countTasksByCourse(@Param("courseId") Integer courseId);

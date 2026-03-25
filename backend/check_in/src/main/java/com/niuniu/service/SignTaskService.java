@@ -48,6 +48,7 @@ public class SignTaskService {
         task.setTitle(request.getTitle());
         task.setStartTime(request.getStartTime());
         task.setEndTime(request.getEndTime());
+        task.setStatus(0);
         task.setSignType(request.getSignType());
         task.setQrCode(request.getQrCode());
         task.setLatitude(request.getLatitude());
@@ -60,6 +61,7 @@ public class SignTaskService {
     }
 
     public PageResponse<SignTaskResponse> list(Integer courseId, Integer pageNum, Integer pageSize) {
+        refreshExpiredStatuses();
         Course course = courseService.requireOwnedCourseOrRelated(courseId);
         int offset = (Math.max(pageNum, 1) - 1) * pageSize;
         List<SignTask> tasks = signTaskMapper.listByCourse(courseId, offset, pageSize);
@@ -72,7 +74,23 @@ public class SignTaskService {
         return new PageResponse<>(list, total, pageNum, pageSize);
     }
 
+    public PageResponse<SignTaskResponse> listForTeacher(Integer pageNum, Integer pageSize) {
+        UserSession session = require(UserType.TEACHER);
+        refreshExpiredStatuses();
+        int offset = (Math.max(pageNum, 1) - 1) * pageSize;
+        List<SignTask> tasks = signTaskMapper.listByTeacher(session.getUserNumber(), offset, pageSize);
+        List<SignTaskResponse> list = new ArrayList<>();
+        for (SignTask task : tasks) {
+            Course course = courseService.requireOwnedCourse(task.getCourseId(), session.getUserNumber());
+            list.add(buildResponse(task, course.getCourseName()));
+        }
+        long total = signTaskMapper.countByTeacher(session.getUserNumber());
+        log.info("教师签到任务列表查询完成: teacherNumber={}, total={}", session.getUserNumber(), total);
+        return new PageResponse<>(list, total, pageNum, pageSize);
+    }
+
     public SignTaskResponse detail(Integer taskId) {
+        refreshExpiredStatuses();
         SignTask task = requireTask(taskId);
         Course course = courseService.requireOwnedCourseOrRelated(task.getCourseId());
         log.info("签到任务详情查询成功: taskId={}", taskId);
@@ -88,6 +106,7 @@ public class SignTaskService {
         task.setTitle(request.getTitle());
         task.setStartTime(request.getStartTime());
         task.setEndTime(request.getEndTime());
+        task.setStatus(resolvePersistedStatus(request.getEndTime()));
         task.setSignType(request.getSignType());
         task.setQrCode(request.getQrCode());
         task.setLatitude(request.getLatitude());
@@ -110,6 +129,7 @@ public class SignTaskService {
     }
 
     public SignTaskResponse activeTask(Integer courseId) {
+        refreshExpiredStatuses();
         Course course = courseService.requireOwnedCourseOrRelated(courseId);
         SignTask task = signTaskMapper.activeByCourse(courseId);
         if (task == null) {
@@ -132,6 +152,7 @@ public class SignTaskService {
         response.setTitle(task.getTitle());
         response.setStartTime(task.getStartTime());
         response.setEndTime(task.getEndTime());
+        response.setStatus(task.getStatus());
         response.setSignType(task.getSignType());
         response.setQrCode(resolveQrCode(task));
         response.setLatitude(task.getLatitude());
@@ -165,6 +186,9 @@ public class SignTaskService {
 
     private String resolveState(SignTask task) {
         LocalDateTime now = LocalDateTime.now();
+        if (task.getStatus() != null && task.getStatus() == 1) {
+            return "finished";
+        }
         if (now.isBefore(task.getStartTime())) {
             return "not_started";
         }
@@ -216,6 +240,17 @@ public class SignTaskService {
             throw new BusinessException(404, "签到任务不存在");
         }
         return task;
+    }
+
+    private int resolvePersistedStatus(LocalDateTime endTime) {
+        return endTime != null && endTime.isBefore(LocalDateTime.now()) ? 1 : 0;
+    }
+
+    private void refreshExpiredStatuses() {
+        int affected = signTaskMapper.markExpiredTasksFinished();
+        if (affected > 0) {
+            log.info("签到任务状态自动刷新完成: affected={}", affected);
+        }
     }
 
     private UserSession require(UserType expected) {

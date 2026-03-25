@@ -131,13 +131,12 @@ public class TeacherController {
         return ApiResponse.success(signTaskService.create(request));
     }
 
-    @GetMapping("/courses/{courseId}/sign-tasks")
-    @Operation(summary = "查询签到任务列表")
-    public ApiResponse<PageResponse<SignTaskResponse>> signTaskList(@PathVariable Integer courseId,
-                                                                    @RequestParam(defaultValue = "1") Integer pageNum,
+    @GetMapping("/sign-tasks")
+    @Operation(summary = "查询教师签到任务列表")
+    public ApiResponse<PageResponse<SignTaskResponse>> signTaskList(@RequestParam(defaultValue = "1") Integer pageNum,
                                                                     @RequestParam(defaultValue = "10") Integer pageSize) {
-        log.info("教师查询签到任务列表: courseId={}, pageNum={}, pageSize={}", courseId, pageNum, pageSize);
-        return ApiResponse.success(signTaskService.list(courseId, pageNum, pageSize));
+        log.info("教师查询签到任务列表: pageNum={}, pageSize={}", pageNum, pageSize);
+        return ApiResponse.success(signTaskService.listForTeacher(pageNum, pageSize));
     }
 
     @GetMapping("/sign-tasks/{taskId}")
