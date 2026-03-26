@@ -78,13 +78,26 @@ public class StatisticsService {
         return response;
     }
 
-    public PageResponse<StudentAttendanceResponse> studentStatistics(Integer courseId, Integer pageNum, Integer pageSize) {
+    public PageResponse<StudentAttendanceResponse> studentStatistics(Integer courseId, Integer taskId, Integer pageNum, Integer pageSize) {
         UserSession session = requireTeacher();
         courseService.requireOwnedCourse(courseId, session.getUserNumber());
         int offset = (Math.max(pageNum, 1) - 1) * pageSize;
-        List<StudentAttendanceResponse> list = studentMapper.studentAttendance(courseId, offset, pageSize);
+        if (taskId != null) {
+            SignTask task = signTaskMapper.findById(taskId);
+            if (task == null) {
+                throw new BusinessException(404, "签到任务不存在");
+            }
+            if (!courseId.equals(task.getCourseId())) {
+                throw new BusinessException(400, "taskId 不属于该课程");
+            }
+            List<StudentAttendanceResponse> list = studentMapper.taskAttendance(courseId, taskId, offset, pageSize);
+            long total = courseMemberMapper.countMembers(courseId);
+            log.info("学生出勤统计完成: courseId={}, taskId={}, total={}", courseId, taskId, total);
+            return new PageResponse<>(list, total, pageNum, pageSize);
+        }
+        List<StudentAttendanceResponse> list = studentMapper.courseAttendance(courseId, offset, pageSize);
         long total = courseMemberMapper.countMembers(courseId);
-        log.info("学生出勤统计完成: courseId={}, total={}", courseId, total);
+        log.info("学生出勤统计完成: courseId={}, taskId={}, total={}", courseId, taskId, total);
         return new PageResponse<>(list, total, pageNum, pageSize);
     }
 

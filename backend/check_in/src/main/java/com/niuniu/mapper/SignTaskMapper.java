@@ -96,4 +96,18 @@ public interface SignTaskMapper {
 
     @Select("select count(1) from sign_tasks where course_id = #{courseId}")
     int countTasksByCourse(@Param("courseId") Integer courseId);
+
+    @Select("""
+            <script>
+            select count(1)
+            from sign_tasks st
+            join courses c on st.course_id = c.id
+            where c.teacher_id = #{teacherId}
+              and st.end_time > now()
+            <if test="excludeTaskId != null">
+              and st.id != #{excludeTaskId}
+            </if>
+            </script>
+            """)
+    int countUnfinishedByTeacher(@Param("teacherId") String teacherId, @Param("excludeTaskId") Integer excludeTaskId);
 }

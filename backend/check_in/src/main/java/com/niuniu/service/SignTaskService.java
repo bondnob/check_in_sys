@@ -43,6 +43,9 @@ public class SignTaskService {
         validateTime(request.getStartTime(), request.getEndTime());
         validateRequest(request);
         Course course = courseService.requireOwnedCourse(request.getCourseId(), session.getUserNumber());
+        if (request.getEndTime().isAfter(LocalDateTime.now())) {
+            ensureNoUnfinishedTask(session.getUserNumber(), null);
+        }
         SignTask task = new SignTask();
         task.setCourseId(request.getCourseId());
         task.setTitle(request.getTitle());
@@ -103,6 +106,9 @@ public class SignTaskService {
         courseService.requireOwnedCourse(task.getCourseId(), session.getUserNumber());
         validateTime(request.getStartTime(), request.getEndTime());
         validateRequest(request);
+        if (request.getEndTime().isAfter(LocalDateTime.now())) {
+            ensureNoUnfinishedTask(session.getUserNumber(), taskId);
+        }
         task.setTitle(request.getTitle());
         task.setStartTime(request.getStartTime());
         task.setEndTime(request.getEndTime());
@@ -250,6 +256,12 @@ public class SignTaskService {
         int affected = signTaskMapper.markExpiredTasksFinished();
         if (affected > 0) {
             log.info("签到任务状态自动刷新完成: affected={}", affected);
+        }
+    }
+
+    private void ensureNoUnfinishedTask(String teacherNumber, Integer excludeTaskId) {
+        if (signTaskMapper.countUnfinishedByTeacher(teacherNumber, excludeTaskId) > 0) {
+            throw new BusinessException(409, "当前教师已有未结束的签到任务，无法发起新的签到");
         }
     }
 

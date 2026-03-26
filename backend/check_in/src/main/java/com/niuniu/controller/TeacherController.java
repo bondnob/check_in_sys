@@ -206,9 +206,10 @@ public class TeacherController {
     @GetMapping("/statistics/courses/{courseId}/students")
     @Operation(summary = "查询学生出勤统计")
     public ApiResponse<PageResponse<StudentAttendanceResponse>> studentStatistics(@PathVariable Integer courseId,
+                                                                                  @RequestParam(required = false) Integer taskId,
                                                                                   @RequestParam(defaultValue = "1") Integer pageNum,
                                                                                   @RequestParam(defaultValue = "10") Integer pageSize) {
-        log.info("教师查询学生出勤统计: courseId={}, pageNum={}, pageSize={}", courseId, pageNum, pageSize);
-        return ApiResponse.success(statisticsService.studentStatistics(courseId, pageNum, pageSize));
+        log.info("教师查询学生出勤统计: courseId={}, taskId={}, pageNum={}, pageSize={}", courseId, taskId, pageNum, pageSize);
+        return ApiResponse.success(statisticsService.studentStatistics(courseId, taskId, pageNum, pageSize));
     }
 }

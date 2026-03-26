@@ -222,6 +222,31 @@ Authorization: Bearer {teacherToken}
 - `unsignedCount=2`
 - `lateCount=1`
 
+### 4.11 按单次签到任务查询学生出勤统计
+
+`GET /api/v1/statistics/courses/1/students?taskId=1&pageNum=1&pageSize=10`
+
+预期：
+
+- 每个学生的 `signedCount` 只统计任务 1
+- 已签到学生 `attendanceRate=100`
+- 未签到学生 `attendanceRate=0`
+
+### 4.12 教师存在未结束签到任务时再次创建签到
+
+前提：
+
+- 当前教师已有一个 `endTime` 仍未到达的签到任务
+
+请求：
+
+`POST /api/v1/sign-tasks`
+
+预期：
+
+- 返回 `409`
+- message 为 `当前教师已有未结束的签到任务，无法发起新的签到`
+
 ## 5. 学生端测试用例
 
 所有学生接口请求头带：
@@ -422,4 +447,3 @@ Authorization: Bearer abcdefg
 预期：
 
 - 返回 `403`
-

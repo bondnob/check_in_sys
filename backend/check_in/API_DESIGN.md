@@ -392,6 +392,7 @@ auth.jwt.expire-seconds=604800
 - `signType=1` 时必须传 `qrCode`
 - `signType=0` 时必须传 `latitude`、`longitude`、`radius`
 - `lateTime` 必须在开始和结束时间之间
+- 同一教师只要存在未结束的签到任务，就不能再创建新的签到任务
 
 ### 6.2 查询签到任务列表
 
@@ -451,6 +452,10 @@ auth.jwt.expire-seconds=604800
 - 课程所属教师
 
 请求体与创建接口基本一致，但不需要 `courseId`
+
+补充校验：
+
+- 如果该教师还有其他未结束签到任务，则不能把当前任务更新为新的未结束签到
 
 ### 6.5 删除签到任务
 
@@ -643,6 +648,7 @@ auth.jwt.expire-seconds=604800
 
 查询参数：
 
+- `taskId` 可选，不传表示课程总出勤统计，传入后表示只统计该次签到任务
 - `pageNum`
 - `pageSize`
 
@@ -675,4 +681,3 @@ auth.jwt.expire-seconds=604800
 - 找不到返回 `查无此人`
 
 如果后续你又改回微信登录，这份文档也需要一起更新。
-
